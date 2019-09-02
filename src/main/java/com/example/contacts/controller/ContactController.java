@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
-import static org.springframework.http.HttpStatus.NOT_FOUND;
+import java.util.List;
 
 @RestController
 @RequestMapping({"/contacts"})
@@ -26,16 +26,18 @@ public class ContactController {
     }
 
     @PutMapping(value="/{id}")
-    public ResponseEntity<ContactDto> update(@PathVariable("id") long id,
-                                             @RequestBody ContactDto contactDto){
-
-        return contactService.update(id, contactDto).map(ResponseEntity::ok)
-                .orElse(new ResponseEntity<>(NOT_FOUND));
+    public ResponseEntity<ContactDto> update(@PathVariable("id") long id, @Valid @RequestBody ContactDto contactDto){
+        return ResponseEntity.ok().body(contactService.update(id, contactDto));
     }
 
     @GetMapping(path = {"/{id}"})
     public ResponseEntity<ContactDto> findById(@PathVariable long id){
-        return null;
+        return ResponseEntity.ok().body(contactService.findById(id));
+    }
+
+    @PostMapping(path = {"/search"})
+    public  List<ContactDto> search(@RequestBody ContactDto contactDto){
+        return contactService.search(contactDto);
     }
 
     @DeleteMapping(path ={"/{id}"})
