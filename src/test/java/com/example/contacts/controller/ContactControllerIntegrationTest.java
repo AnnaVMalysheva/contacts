@@ -2,7 +2,7 @@ package com.example.contacts.controller;
 
 import com.example.contacts.ContactApplication;
 import com.example.contacts.dto.ContactDto;
-import com.example.contacts.dto.SearchContactDto;
+import com.example.contacts.dto.ContactConfigDto;
 import com.example.contacts.entity.Contact;
 import com.example.contacts.repository.ContactRepository;
 import com.example.contacts.service.ContactService;
@@ -26,6 +26,7 @@ import static org.junit.Assert.*;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
@@ -58,8 +59,8 @@ public class ContactControllerIntegrationTest {
 		MvcResult result = mockMvc.perform(post(BASE_URL)
 				.content(objectMapper.writeValueAsString(CONTACT_DTO)).contentType(APPLICATION_JSON_UTF8))
 				.andExpect(status().isCreated()).andReturn();
-		ContactDto addedContactDto = objectMapper.readValue(result.getResponse().getContentAsString(),
-				ContactDto.class);
+		ContactConfigDto addedContactDto = objectMapper.readValue(result.getResponse().getContentAsString(),
+				ContactConfigDto.class);
 
 		Contact foundContact = contactRepository.findById(addedContactDto.getId()).orElse(null);
 
@@ -82,7 +83,7 @@ public class ContactControllerIntegrationTest {
 	@Test
 	@WithUserDetails(userDetailsServiceBeanName = "userDetailsService")
 	public void deleteContact() throws Exception {
-		ContactDto contactDto = contactService.add(CONTACT_DTO);
+		ContactConfigDto contactDto = contactService.add(CONTACT_DTO);
 
 		mockMvc.perform(delete(BASE_URL + "/" + contactDto.getId()).contentType(APPLICATION_JSON_UTF8)).andExpect(status().isOk());
 
@@ -102,7 +103,7 @@ public class ContactControllerIntegrationTest {
 
 		MvcResult result = mockMvc.perform(post(BASE_URL).content(objectMapper.writeValueAsString(CONTACT_DTO)).contentType(APPLICATION_JSON_UTF8)).andExpect(status().isCreated()).andReturn();
 
-		ContactDto resultContactDto = objectMapper.readValue(result.getResponse().getContentAsString(), ContactDto.class);
+		ContactConfigDto resultContactDto = objectMapper.readValue(result.getResponse().getContentAsString(), ContactConfigDto.class);
 		String updPostfix = "_new";
 
         ContactDto updatedContactDto = ContactDto.builder()
@@ -114,7 +115,7 @@ public class ContactControllerIntegrationTest {
 
 		result = mockMvc.perform(put(BASE_URL + "/" + resultContactDto.getId()).content(objectMapper.writeValueAsString(updatedContactDto)).contentType(APPLICATION_JSON_UTF8)).andExpect(status().isOk()).andReturn();
 
-		resultContactDto = objectMapper.readValue(result.getResponse().getContentAsString(), ContactDto.class);
+		resultContactDto = objectMapper.readValue(result.getResponse().getContentAsString(), ContactConfigDto.class);
 
 		Contact updatedContact = contactRepository.findById(resultContactDto.getId()).orElse(null);
 
@@ -150,63 +151,17 @@ public class ContactControllerIntegrationTest {
 				.content(objectMapper.writeValueAsString(CONTACT_DTO)).contentType(APPLICATION_JSON_UTF8))
 				.andExpect(status().isCreated()).andReturn();
 
-		SearchContactDto searchContactDto = SearchContactDto.builder()
+		ContactConfigDto addedContactDto = objectMapper.readValue(result.getResponse().getContentAsString(), ContactConfigDto.class);
+
+		ContactConfigDto contactConfigDto = ContactConfigDto.builder()
 				.firstName(SEARCH_CONTACT_DTO.getFirstName())
 				.build();
 
-		MvcResult foundResult = mockMvc.perform(post(BASE_URL + "/search")
-				.content(objectMapper.writeValueAsString(searchContactDto)).contentType(APPLICATION_JSON_UTF8))
-				.andExpect(status().isOk()).andReturn();
-
-		ContactDto foundContactDto = objectMapper.readValue(result.getResponse().getContentAsString(),
-				ContactDto.class);
-
-		assertEquals(CONTACT_DTO.getFirstName(), foundContactDto.getFirstName());
-		assertEquals(CONTACT_DTO.getLastName(), foundContactDto.getLastName());
-		assertEquals(CONTACT_DTO.getEmail(), foundContactDto.getEmail());
-		assertEquals(CONTACT_DTO.getPhone(), foundContactDto.getPhone());
+		mockMvc.perform(post(BASE_URL + "/search")
+				.content(objectMapper.writeValueAsString(contactConfigDto)).contentType(APPLICATION_JSON_UTF8))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.length()").value(1))
+				.andExpect(jsonPath("$[0].id").value(addedContactDto.getId() + ""))
+				.andExpect(jsonPath("$[0].firstName").value(SEARCH_CONTACT_DTO.getFirstName()));
 	}
-
-//	@Test(expected = EntityNotFoundException.class)
-//	@WithUserDetails(value = "user1", userDetailsServiceBeanName = "managerUserDetailsService")
-//	public void deleteAppRequest() throws Exception {
-//		AppRequestConfigDto appRequestConfigDto = appService.addAppRequest(APP_REQUEST_CONFIG_DTO, 1L);
-//		MultiValueMap params = new LinkedMultiValueMap<>();
-//		params.add("id", appRequestConfigDto.getId().toString());
-//		mockMvc.perform(delete(BASE_URL).params(params).contentType(APPLICATION_JSON_UTF8)).andExpect(status().isOk());
-//		appRequestRepository.findById(appRequestConfigDto.getId()).orElseThrow(EntityNotFoundException::new);
-//	}
-//
-//	@Test
-//	@WithUserDetails(value = "user1", userDetailsServiceBeanName = "managerUserDetailsService")
-//	public void setState() throws Exception {
-//		AppRequestConfigDto appRequestConfigDto = appService.addAppRequest(APP_REQUEST_CONFIG_DTO, 1L);
-//		JSONObject appRequestStateDto = new JSONObject();
-//		appRequestStateDto.put("id", appRequestConfigDto.getId());
-//		appRequestStateDto.put("lastState", IN_REVIEW.toString());
-//		mockMvc.perform(put(BASE_URL + "/state").content(appRequestStateDto.toJSONString()).contentType(APPLICATION_JSON_UTF8)).andExpect(status().isOk());
-//		AppRequest newRequest = appRequestRepository.findById(appRequestConfigDto.getId()).orElseThrow(EntityNotFoundException::new);
-//		assertEquals(IN_REVIEW, newRequest.getLastState());
-//	}
-//
-//	@Test
-//	@WithUserDetails(value = "user1", userDetailsServiceBeanName = "managerUserDetailsService")
-//	public void setConfig() throws Exception {
-//		AppRequestConfigDto appRequestConfigDto = appService.addAppRequest(APP_REQUEST_CONFIG_DTO, 1L);
-//		JSONObject config = new JSONObject();
-//		config.put("key1", "value1");
-//		config.put("key2", "value2");
-//		JSONObject request = new JSONObject();
-//		request.put("id", appRequestConfigDto.getId());
-//		request.put("config", config);
-//		mockMvc.perform(put(BASE_URL + "/config").content(request.toJSONString()).contentType(APPLICATION_JSON_UTF8)).andExpect(status().isOk());
-//		AppRequest newRequest = appRequestRepository.findById(appRequestConfigDto.getId()).orElseThrow(EntityNotFoundException::new);
-//
-//		HashMap configMap = new HashMap();
-//		configMap.put("key1", "value1");
-//		configMap.put("key2", "value2");
-//		configMap.put("key3", "value3");
-//
-//		assertThat(newRequest.getConfig(), is(configMap));
-//	}
 }

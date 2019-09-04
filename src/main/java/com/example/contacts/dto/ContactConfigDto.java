@@ -10,7 +10,9 @@ import lombok.*;
 @AllArgsConstructor
 @EqualsAndHashCode
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class SearchContactDto {
+public class ContactConfigDto {
+
+    private Long id;
 
     private String firstName;
 

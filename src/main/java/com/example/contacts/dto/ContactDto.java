@@ -13,10 +13,7 @@ import javax.validation.constraints.Size;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ContactDto {
-
-    private Long id;
 
     @NotNull
     @Size(max = 255)

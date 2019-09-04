@@ -1,7 +1,7 @@
 package com.example.contacts.service.impl;
 
 import com.example.contacts.dto.ContactDto;
-import com.example.contacts.dto.SearchContactDto;
+import com.example.contacts.dto.ContactConfigDto;
 import com.example.contacts.entity.Contact;
 import com.example.contacts.exception.ContactAlreadyExistException;
 import com.example.contacts.exception.ContactNotFoundException;
@@ -24,22 +24,22 @@ public class ContactServiceImpl implements ContactService {
     }
 
     @Override
-    public ContactDto add(ContactDto contactDto) {
+    public ContactConfigDto add(ContactDto contactDto) {
         contactRepository.findByEmail(contactDto.getEmail()).ifPresent(contact -> {
             throw new ContactAlreadyExistException("Contact with email " + (contactDto.getEmail() + " already exists"));
         });
-        return ContactMapper.asContactDto(contactRepository.save(ContactMapper.asEntity(contactDto)));
+        return ContactMapper.asContactConfigDto(contactRepository.save(ContactMapper.asEntity(contactDto)));
     }
 
     @Transactional
     @Override
-    public ContactDto update(long id, ContactDto contactDto) {
+    public ContactConfigDto update(long id, ContactDto contactDto) {
         Contact contact = contactRepository.findById(id).orElseThrow(ContactNotFoundException::new);
         contact.setFirstName(contactDto.getFirstName());
         contact.setLastName(contactDto.getLastName());
         contact.setEmail(contactDto.getEmail());
         contact.setPhone(contactDto.getPhone());
-        return ContactMapper.asContactDto(contact);
+        return ContactMapper.asContactConfigDto(contact);
     }
 
     @Override
@@ -50,15 +50,15 @@ public class ContactServiceImpl implements ContactService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<ContactDto> search(SearchContactDto searchContactDto) {
-        Contact contact = ContactMapper.asEntity(searchContactDto);
+    public List<ContactConfigDto> search(ContactConfigDto contactConfigDto) {
+        Contact contact = ContactMapper.asEntity(contactConfigDto);
         Example<Contact> example = Example.of(contact);
-        return ContactMapper.asContactDto(contactRepository.findAll(example));
+        return ContactMapper.asContactConfigDto(contactRepository.findAll(example));
     }
 
     @Transactional(readOnly = true)
     @Override
-    public ContactDto findById(long id) {
-        return ContactMapper.asContactDto(contactRepository.findById(id).orElseThrow(ContactNotFoundException::new));
+    public ContactConfigDto findById(long id) {
+        return ContactMapper.asContactConfigDto(contactRepository.findById(id).orElseThrow(ContactNotFoundException::new));
     }
 }

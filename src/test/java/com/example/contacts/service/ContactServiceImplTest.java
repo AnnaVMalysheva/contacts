@@ -1,5 +1,6 @@
 package com.example.contacts.service;
 
+import com.example.contacts.dto.ContactConfigDto;
 import com.example.contacts.dto.ContactDto;
 import com.example.contacts.entity.Contact;
 import com.example.contacts.exception.ContactAlreadyExistException;
@@ -43,7 +44,7 @@ public class ContactServiceImplTest {
 
 		when(contactRepository.findAll((Example<Contact>) anyObject())).thenReturn(Collections.singletonList(CONTACT));
 
-		List<ContactDto> searchResults = contactServiceImpl.search(SEARCH_CONTACT_DTO);
+		List<ContactConfigDto> searchResults = contactServiceImpl.search(SEARCH_CONTACT_DTO);
 
 		verify(contactRepository, times(1)).findAll(contactExampleArgumentCaptor.capture());
 
@@ -104,12 +105,12 @@ public class ContactServiceImplTest {
 		ContactDto updatedContactDto = ContactDto.builder().firstName("testnamenew").email("test@mail.ru").build();
 		when(contactRepository.findById(anyLong())).thenReturn(Optional.of(CONTACT));
 
-		ContactDto updatedContact = contactServiceImpl.update(1L, updatedContactDto);
+		ContactConfigDto updatedContactConfigDto = contactServiceImpl.update(1L, updatedContactDto);
 
 		verify(contactRepository, times(1)).findById(1L);
 
-		assertEquals(updatedContactDto.getFirstName(), updatedContact.getFirstName());
-		assertEquals(updatedContactDto.getEmail(), updatedContact.getEmail());
+		assertEquals(updatedContactDto.getFirstName(), updatedContactConfigDto.getFirstName());
+		assertEquals(updatedContactDto.getEmail(), updatedContactConfigDto.getEmail());
 	}
 
 	@Test(expected = ContactNotFoundException.class)
@@ -118,8 +119,7 @@ public class ContactServiceImplTest {
 
 		when(contactRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-		ContactDto updatedContact = contactServiceImpl.update(1L, contactDto);
-
+		contactServiceImpl.update(1L, contactDto);
 		verify(contactRepository, times(1)).findById(1L);
 	}
 

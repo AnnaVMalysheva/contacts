@@ -1,7 +1,7 @@
 package com.example.contacts.mapper;
 
 import com.example.contacts.dto.ContactDto;
-import com.example.contacts.dto.SearchContactDto;
+import com.example.contacts.dto.ContactConfigDto;
 import com.example.contacts.entity.Contact;
 import org.modelmapper.ModelMapper;
 
@@ -20,15 +20,19 @@ public class ContactMapper {
         return toDtoMapper.map(entity, ContactDto.class);
     }
 
-    public static List<ContactDto> asContactDto(Collection<Contact> entities) {
-        return entities == null ? emptyList() : entities.stream().map(ContactMapper::asContactDto).collect(toList());
+    public static List<ContactConfigDto> asContactConfigDto(Collection<Contact> entities) {
+        return entities == null ? emptyList() : entities.stream().map(ContactMapper::asContactConfigDto).collect(toList());
+    }
+
+    public static ContactConfigDto asContactConfigDto(Contact entity) {
+        return toDtoMapper.map(entity, ContactConfigDto.class);
     }
 
     public static Contact asEntity(ContactDto dto) {
         return toEntityMapper.map(dto, Contact.class);
     }
 
-    public static Contact asEntity(SearchContactDto dto) {
+    public static Contact asEntity(ContactConfigDto dto) {
         return toEntityMapper.map(dto, Contact.class);
     }
 }
