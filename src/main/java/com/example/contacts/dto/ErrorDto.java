@@ -12,9 +12,9 @@ import lombok.*;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ErrorDto {
 
-	private Integer code;
+    private Integer code;
 
-	private String field;
+    private String field;
 
-	private String message;
+    private String message;
 }

@@ -17,27 +17,26 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-	@Bean
-	@Override
-	public UserDetailsService userDetailsService() {
-		UserDetails user =
-				User.withDefaultPasswordEncoder()
-						.username("user")
-						.password("password")
-						.roles("USER")
-						.build();
+    @Bean
+    @Override
+    public UserDetailsService userDetailsService() {
+        UserDetails user =
+                User.withDefaultPasswordEncoder()
+                        .username("user")
+                        .password("password")
+                        .roles("USER")
+                        .build();
 
-		return new InMemoryUserDetailsManager(user);
-	}
+        return new InMemoryUserDetailsManager(user);
+    }
 
 
-	@Override
-	protected void configure(HttpSecurity http) throws Exception {
-		http.csrf().disable().authorizeRequests()
-				.antMatchers("/api/**","/v2/api-docs", "/swagger-resources/configuration/ui", "/swagger-resources", "/swagger-resources/configuration/security", "/swagger-ui.html", "/webjars/**").permitAll()
-				.antMatchers(HttpMethod.OPTIONS, "/**").permitAll().anyRequest().authenticated()
-				.and().httpBasic()
-				.and().logout().clearAuthentication(true).invalidateHttpSession(true).deleteCookies("JSESSIONID");
-	}
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http.csrf().disable().authorizeRequests()
+                .antMatchers(HttpMethod.OPTIONS, "/**").permitAll().anyRequest().authenticated()
+                .and().httpBasic()
+                .and().logout().clearAuthentication(true).invalidateHttpSession(true).deleteCookies("JSESSIONID");
+    }
 
 }
